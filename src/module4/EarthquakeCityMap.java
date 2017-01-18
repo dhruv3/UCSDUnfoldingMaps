@@ -1,6 +1,7 @@
 package module4;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import de.fhpotsdam.unfolding.UnfoldingMap;
@@ -11,7 +12,7 @@ import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.marker.AbstractShapeMarker;
 import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
-import de.fhpotsdam.unfolding.providers.Google;
+import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
@@ -20,7 +21,7 @@ import processing.core.PApplet;
 /** EarthquakeCityMap
  * An application with an interactive map displaying earthquake data.
  * Author: UC San Diego Intermediate Software Development MOOC team
- * @author Your name here
+ * @author Dhruv Dogra
  * Date: July 17, 2015
  * */
 public class EarthquakeCityMap extends PApplet {
@@ -68,15 +69,15 @@ public class EarthquakeCityMap extends PApplet {
 		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
 		}
 		else {
-			map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			map = new UnfoldingMap(this, 200, 50, 650, 600, new Microsoft.HybridProvider());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
-		    //earthquakesURL = "2.5_week.atom";
+		    earthquakesURL = "2.5_week.atom";
 		}
 		MapUtils.createDefaultEventDispatcher(this, map);
 		
 		// FOR TESTING: Set earthquakesURL to be one of the testing files by uncommenting
 		// one of the lines below.  This will work whether you are online or offline
-		//earthquakesURL = "test1.atom";
+		earthquakesURL = "test1.atom";
 		//earthquakesURL = "test2.atom";
 		
 		// WHEN TAKING THIS QUIZ: Uncomment the next line
@@ -167,6 +168,18 @@ public class EarthquakeCityMap extends PApplet {
 		// TODO: Implement this method using the helper method isInCountry
 		
 		// not inside any country
+		for(Marker country: countryMarkers){
+			if(isInCountry(earthquake, country)){
+				return true;
+			}
+//			Location quakeCoord = earthquake.getLocation(); 
+//			Location countryCoord = country.getLocation();
+//			if(quakeCoord.equals(countryCoord)){
+//				
+//				return true;
+//			}
+		}
+				
 		return false;
 	}
 	
@@ -178,7 +191,28 @@ public class EarthquakeCityMap extends PApplet {
 	// And LandQuakeMarkers have a "country" property set.
 	private void printQuakes() 
 	{
-		// TODO: Implement this method
+		int totalWaterQuakes = quakeMarkers.size();
+
+		for(Marker country: countryMarkers){
+			String name  = (String)country.getProperty("name");
+			int counter = 0;
+			//Loop through all quakes
+			for(Marker marker: quakeMarkers){
+				EarthquakeMarker eMarker = (EarthquakeMarker)marker;
+				//quake occurs on land
+				if (eMarker.isOnLand()) {
+					if (name.equals((String)eMarker.getProperty("country"))) {
+						counter++;
+					}
+				}
+			}
+			
+			if (counter > 0) {
+				totalWaterQuakes = totalWaterQuakes  - counter;
+				System.out.println(name + ": " + counter);
+			}
+		}
+		System.out.println("Ocean Quake- " + totalWaterQuakes);
 	}
 	
 	
